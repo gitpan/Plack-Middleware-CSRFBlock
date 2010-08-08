@@ -18,8 +18,11 @@ no_index:
     - inc
     - t
     - xt
+requires:
+  Plack: 0
+  Plack::Middleware::Session: 0
 resources:
   homepage: http://github.com/rintaro/Plack-Middleware-CSRFBlock/tree
   license: http://dev.perl.org/licenses/
   repository: git://github.com/rintaro/Plack-Middleware-CSRFBlock.git
-version: 0.01
+version: 0.02
