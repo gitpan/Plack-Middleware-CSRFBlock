@@ -25,4 +25,4 @@ resources:
   homepage: http://github.com/rintaro/Plack-Middleware-CSRFBlock/tree
   license: http://dev.perl.org/licenses/
   repository: git://github.com/rintaro/Plack-Middleware-CSRFBlock.git
-version: 0.02
+version: 0.03
