@@ -2,10 +2,12 @@ package Plack::Middleware::CSRFBlock;
 use parent qw(Plack::Middleware);
 use strict;
 use warnings;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use HTML::Parser;
 use Plack::TempBuffer;
+use Plack::Util;
+use Digest::SHA1;
 use Plack::Util::Accessor qw(
     parameter_name token_length session_key blocked onetime
     _param_re _token_generator
@@ -50,15 +52,17 @@ sub call {
     }
 
     # input filter
-    if($env->{REQUEST_METHOD} eq 'POST' and
-        ($env->{CONTENT_TYPE} eq 'application/x-www-form-urlencoded' or
-         $env->{CONTENT_TYPE} eq 'multipart/form-data')
+    if(
+        $env->{REQUEST_METHOD} =~ m{^post$}i and
+        ($env->{CONTENT_TYPE} =~ m{^(application/x-www-form-urlencoded)}i or
+         $env->{CONTENT_TYPE} =~ m{^(multipart/form-data)}i)
     ) {
+        my $ct = $1;
         my $token = $session->{$self->session_key}
             or return $self->token_not_found;
 
         my $cl = $env->{CONTENT_LENGTH};
-        my $re = $self->_param_re->{$env->{CONTENT_TYPE}};
+        my $re = $self->_param_re->{$ct};
         my $input = $env->{'psgi.input'};
         my $buffer;
 
@@ -77,7 +81,7 @@ sub call {
             my $read = length $chunk;
             $cl -= $read;
             if($done) {
-                $buffer->print($chunk);
+                $buffer->print($chunk) if $buffer;
             }
             else {
                 $buf .= $chunk;
@@ -86,7 +90,7 @@ sub call {
                         $found = 1;
                         last if not $buffer;
                     }
-                    $buffer->print($buf);
+                    $buffer->print($buf) if $buffer;
                     undef $buf;
                     $done = 1;
                 }
@@ -118,7 +122,7 @@ sub call {
     return $self->response_cb($self->app->($env), sub {
         my $res = shift;
         my $ct = Plack::Util::header_get($res->[1], 'Content-Type');
-        if($ct ne 'text/html' and $ct ne 'application/xhtml+xml') {
+        if($ct !~ m{^text/html}i and $ct !~ m{^application/xhtml[+]xml}i){
             return $res;
         }
 
@@ -190,9 +194,9 @@ Plack::Middleware::CSRFBlock - CSRF are never propageted to app
 =head1 SYNOPSIS
 
   use Plack::Builder;
-  
+
   my $app = sub { ... }
-  
+
   builder {
     enable 'Session';
     enable 'CSRFBlock';
@@ -231,7 +235,7 @@ this becomes:
       </form>
   </html>
 
-This affects C<form> tags with C<method="post">, case insensitive. 
+This affects C<form> tags with C<method="post">, case insensitive.
 
 =item input check
 
@@ -243,6 +247,24 @@ Supports C<application/x-www-form-urlencoded> and C<multipart/form-data>.
 =back
 
 =head1 OPTIONS
+
+  use Plack::Builder;
+  
+  my $app = sub { ... }
+  
+  builder {
+    enable 'Session';
+    enable 'CSRFBlock',
+      parameter_name => 'csrf_secret',
+      token_length => 20,
+      session_key => 'csrf_token',
+      blocked => sub {
+        [302, [Location => 'http://www.google.com'], ['']];
+      },
+      onetime => 0,
+      ;
+    $app;
+  }
 
 =over 4
 

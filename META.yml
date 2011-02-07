@@ -19,10 +19,10 @@ no_index:
     - t
     - xt
 requires:
+  Digest::SHA1: 0
   Plack: 0
   Plack::Middleware::Session: 0
 resources:
-  homepage: http://github.com/rintaro/Plack-Middleware-CSRFBlock/tree
   license: http://dev.perl.org/licenses/
   repository: git://github.com/rintaro/Plack-Middleware-CSRFBlock.git
 version: 0.03
