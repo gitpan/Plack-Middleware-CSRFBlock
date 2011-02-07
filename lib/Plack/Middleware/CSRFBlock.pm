@@ -2,7 +2,7 @@ package Plack::Middleware::CSRFBlock;
 use parent qw(Plack::Middleware);
 use strict;
 use warnings;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use HTML::Parser;
 use Plack::TempBuffer;
@@ -141,7 +141,7 @@ sub call {
                 if(
                     lc($tag) ne 'form' or
                     lc($attr->{'method'}) ne 'post' or
-                    ($attr->{'action'} =~ m{^https?://([^/])+/} and $1 ne $http_host)
+                    ($attr->{'action'} =~ m{^https?://([^/:]+)[/:]} and $1 ne $http_host)
                 ) {
                     return;
                 }
