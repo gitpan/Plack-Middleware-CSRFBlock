@@ -1,6 +1,6 @@
 package Plack::Middleware::CSRFBlock;
 {
-  $Plack::Middleware::CSRFBlock::VERSION = '0.06';
+  $Plack::Middleware::CSRFBlock::VERSION = '0.07';
 }
 use parent qw(Plack::Middleware);
 use strict;
@@ -178,7 +178,7 @@ Plack::Middleware::CSRFBlock - Block CSRF Attacks with minimal changes to your a
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -202,10 +202,9 @@ to your application, in most cases. Here is the strategy:
 =item output filter
 
 When the application response content-type is "text/html" or
-"application/xhtml+xml", this inserts hidden input tag that contains token
-string into C<form>s in the response body.  It can also adds an optional meta
-tag (by setting C<add_meta> to true) with the default name "csrftoken".
-For example, the application response body is:
+"application/xhtml+xml", this inserts a hidden input tag that contains a token
+string into C<form>s in the response body. For example, when the application
+response body is:
 
   <html>
     <head>
@@ -217,10 +216,10 @@ For example, the application response body is:
       </form>
   </html>
 
-this becomes:
+This becomes:
 
   <html>
-    <head><meta name="csrftoken" content="0f15ba869f1c0d77"/>
+    <head>
         <title>input form</title>
     </head>
     <body>
@@ -230,6 +229,21 @@ this becomes:
   </html>
 
 This affects C<form> tags with C<method="post">, case insensitive.
+
+It is possible to add an optional meta tag by setting C<meta_tag> to a defined
+value. The 'name' attribute of the HTML tag will be set to the value of
+C<meta_tag>. For the previous example, when C<meta_tag> is set to
+'csrf_token', the output will be:
+
+  <html>
+    <head><meta name="csrf_token" content="0f15ba869f1c0d77"/>
+        <title>input form</title>
+    </head>
+    <body>
+      <form action="/api" method="post"><input type="hidden" name="SEC" value="0f15ba869f1c0d77" />
+        <input type="text" name="email" /><input type="submit" />
+      </form>
+  </html>
 
 =item input check
 
@@ -350,7 +364,7 @@ Matthew Phillips <mattp@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by the Authors of Plack-Middleware-CSRFBlock.
+This software is copyright (c) 2013 by the Authors of Plack-Middleware-CSRFBlock.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
