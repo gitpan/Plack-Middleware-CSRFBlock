@@ -1,6 +1,6 @@
 package Plack::Middleware::CSRFBlock;
 {
-  $Plack::Middleware::CSRFBlock::VERSION = '0.07';
+  $Plack::Middleware::CSRFBlock::VERSION = '0.08';
 }
 use parent qw(Plack::Middleware);
 use strict;
@@ -178,7 +178,7 @@ Plack::Middleware::CSRFBlock - Block CSRF Attacks with minimal changes to your a
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 

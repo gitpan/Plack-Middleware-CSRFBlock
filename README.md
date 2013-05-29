@@ -4,7 +4,7 @@ Plack::Middleware::CSRFBlock - Block CSRF Attacks with minimal changes to your a
 
 # VERSION
 
-version 0.07
+version 0.08
 
 # SYNOPSIS
 
