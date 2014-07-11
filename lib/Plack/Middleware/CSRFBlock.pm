@@ -1,7 +1,5 @@
 package Plack::Middleware::CSRFBlock;
-{
-  $Plack::Middleware::CSRFBlock::VERSION = '0.08';
-}
+$Plack::Middleware::CSRFBlock::VERSION = '0.09';
 use parent qw(Plack::Middleware);
 use strict;
 use warnings;
@@ -9,6 +7,7 @@ use warnings;
 # ABSTRACT: Block CSRF Attacks with minimal changes to your app
 
 use Digest::SHA1;
+use Time::HiRes qw(time);
 use HTML::Parser;
 use Plack::Request;
 use Plack::TempBuffer;
@@ -61,7 +60,7 @@ sub call {
     my $token = $session->{$self->session_key};
     if($request->method =~ m{^post$}i) {
         # Log the request with env info
-        $self->log(info => 'Got POST Request');
+        $self->log(debug => 'Got POST Request');
 
         # If we don't have a token, can't do anything
         return $self->token_not_found($env) unless $token;
@@ -71,13 +70,13 @@ sub call {
         # First, check if the header is set correctly.
         $found = ( $request->header( $self->header_name ) || '') eq $token;
 
-        $self->log(info => 'Found in Header? : ' . ($found ? 1 : 0));
+        $self->log(debug => 'Found in Header? : ' . ($found ? 1 : 0));
 
         # If the token wasn't set, let's check the params
         unless ($found) {
             my $val = $request->parameters->{ $self->parameter_name } || '';
             $found = $val eq $token;
-            $self->log(info => 'Found in parameters : ' . ($found ? 1 : 0));
+            $self->log(debug => 'Found in parameters : ' . ($found ? 1 : 0));
         }
 
         return $self->token_not_found($env) unless $found;
@@ -169,8 +168,11 @@ sub token_not_found {
 
 1;
 
+__END__
 
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -178,7 +180,7 @@ Plack::Middleware::CSRFBlock - Block CSRF Attacks with minimal changes to your a
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -364,13 +366,9 @@ Matthew Phillips <mattp@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by the Authors of Plack-Middleware-CSRFBlock.
+This software is copyright (c) 2014 by the Authors of Plack-Middleware-CSRFBlock.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-
